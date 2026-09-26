@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terminal de Vigilância - Protocolo Verdade</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #070709;
+      color: #e2e8f0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* --- TELA DE ACESSO COM SENHA --- */
+    #lockScreen {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, #14141c 0%, #060608 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      transition: opacity 0.6s ease, visibility 0.6s;
+    }
+
+    #lockScreen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .login-terminal {
+      background: rgba(18, 18, 24, 0.9);
+      border: 1px solid #2a2a38;
+      border-radius: 10px;
+      padding: 35px 30px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 0 15px rgba(255, 255, 255, 0.02);
+      text-align: center;
+    }
+
+    .login-terminal h1 {
+      font-size: 1.1rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #94a3b8;
+      margin-bottom: 25px;
+    }
+
+    .login-terminal input {
+      width: 100%;
+      padding: 14px;
+      border-radius: 6px;
+      border: 1px solid #334155;
+      background: #090a0f;
+      color: #38bdf8;
+      font-family: monospace;
+      font-size: 1.1rem;
+      text-align: center;
+      letter-spacing: 3px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .login-terminal input:focus {
+      border-color: #0284c7;
+      box-shadow: 0 0 12px rgba(2, 132, 199, 0.3);
+    }
+
+    .login-terminal button {
+      width: 100%;
+      margin-top: 18px;
+      padding: 13px;
+      border-radius: 6px;
+      border: none;
+      background: #0284c7;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .login-terminal button:hover {
+      background: #0369a1;
+    }
+
+    .login-terminal button:active {
+      transform: scale(0.98);
+    }
+
+    .error-log {
+      color: #f43f5e;
+      font-size: 0.8rem;
+      margin-top: 14px;
+      min-height: 1.2em;
+      font-family: monospace;
+    }
+
+    /* --- BARRA SUPERIOR DE CONTROLES --- */
+    .top-bar {
+      width: 92vw;
+      max-width: 1100px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .status-text {
+      font-size: 0.85rem;
+      color: #64748b;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .lens-btn {
+      background: #181822;
+      border: 1px solid #334155;
+      color: #cbd5e1;
+      padding: 9px 18px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.25s ease;
+    }
+
+    .lens-btn .led {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #475569;
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+
+    .lens-btn.active {
+      border-color: #22c55e;
+      color: #f0fdf4;
+      background: #0f291e;
+    }
+
+    .lens-btn.active .led {
+      background: #22c55e;
+      box-shadow: 0 0 10px #22c55e;
+    }
+
+    /* --- CONTAINER DE REPRODUÇÃO --- */
+    .viewer-container {
+      position: relative;
+      width: 92vw;
+      max-width: 1100px;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9);
+      cursor: default;
+    }
+
+    .viewer-container.lens-ready {
+      cursor: crosshair;
+    }
+
+    video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Camada 2: A Verdade com Zoom Óptico Centralizado no Cursor */
+    #video-truth {
+      pointer-events: none;
+      /* O zoom in ocorre dinamicamente na coordenada do mouse */
+      transform-origin: var(--lens-x, 50%) var(--lens-y, 50%);
+      transform: scale(var(--zoom-scale, 1));
+      clip-path: circle(var(--lens-radius, 0px) at var(--lens-x, -500px) var(--lens-y, -500px));
+      transition: clip-path 0.03s linear;
+    }
+
+    /* Aro e Retículo da Lente */
+    .lens-reticle {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: calc(var(--lens-radius, 0px) * 2);
+      height: calc(var(--lens-radius, 0px) * 2);
+      transform: translate(calc(var(--lens-x, -500px) - var(--lens-radius, 0px)), 
+                           calc(var(--lens-y, -500px) - var(--lens-radius, 0px)));
+      border: 2px solid rgba(34, 197, 94, 0.8);
+      border-radius: 50%;
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.4), inset 0 0 15px rgba(34, 197, 94, 0.2);
+      pointer-events: none;
+      opacity: var(--lens-opacity, 0);
+      transition: opacity 0.2s ease;
+    }
+
+    /* Linhas internas do retículo */
+    .lens-reticle::before,
+    .lens-reticle::after {
+      content: '';
+      position: absolute;
+      background: rgba(34, 197, 94, 0.5);
+    }
+    .lens-reticle::before {
+      top: 50%;
+      left: 10px;
+      right: 10px;
+      height: 1px;
+      transform: translateY(-50%);
+    }
+    .lens-reticle::after {
+      left: 50%;
+      top: 10px;
+      bottom: 10px;
+      width: 1px;
+      transform: translateX(-50%);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Tela de Acesso -->
+  <div id="lockScreen">
+    <div class="login-terminal">
+      <h1>Terminal de Acesso</h1>
+      <input type="password" id="passwordInput" placeholder="Chave de descriptografia..." autofocus>
+      <button id="unlockBtn">Acessar Câmeras</button>
+      <div class="error-log" id="errorLog"></div>
+    </div>
+  </div>
+
+  <!-- Barra de Ações -->
+  <div class="top-bar">
+    <span class="status-text">Canal de Alimentação 01 & 02 [Sincronizado]</span>
+    <button class="lens-btn" id="toggleLensBtn">
+      <div class="led"></div>
+      <span id="lensBtnLabel">Ativar Lente da Verdade</span>
+    </button>
+  </div>
+
+  <!-- Reprodutor em Camadas -->
+  <div class="viewer-container" id="container">
+    <!-- Camada Superior (Aparência: Mudo) -->
+    <video id="video-surface" src="video1.mp4" loop playsinline muted></video>
+    
+    <!-- Camada Oculta (Verdade: Com áudio e com efeito de lente) -->
+    <video id="video-truth" src="video2.mp4" loop playsinline></video>
+
+    <!-- Retículo de visualização -->
+    <div class="lens-reticle" id="reticle"></div>
+  </div>
+
+  <script>
+    const ACCESS_KEY = "luizajpchat";
+    const LENS_SIZE = 135;       // Raio da lupa em pixels
+    const ZOOM_FACTOR = 1.18;    // 18% de Zoom In dentro da lente
+
+    let isLensActive = false;
+
+    // Elementos DOM
+    const lockScreen = document.getElementById('lockScreen');
+    const passwordInput = document.getElementById('passwordInput');
+    const unlockBtn = document.getElementById('unlockBtn');
+    const errorLog = document.getElementById('errorLog');
+    const toggleLensBtn = document.getElementById('toggleLensBtn');
+    const lensBtnLabel = document.getElementById('lensBtnLabel');
+    const container = document.getElementById('container');
+    const vSurface = document.getElementById('video-surface');
+    const vTruth = document.getElementById('video-truth');
+
+    // Desbloqueio e Reprodução
+    function unlockSystem() {
+      const entered = passwordInput.value.trim().toLowerCase();
+      if (entered === ACCESS_KEY) {
+        errorLog.textContent = "";
+        lockScreen.classList.add('hidden');
+
+        // Garante que o áudio vem exclusivamente do vídeo da verdade
+        vSurface.muted = true;
+        vTruth.muted = false;
+        vTruth.volume = 1.0;
+
+        vSurface.currentTime = 0;
+        vTruth.currentTime = 0;
+
+        Promise.all([vSurface.play(), vTruth.play()]).catch(e => {
+          console.warn("Autoplay bloqueado pelo navegador:", e);
+        });
+      } else {
+        errorLog.textContent = "[ACESSO NEGADO] Senha inválida.";
+        passwordInput.value = "";
+        passwordInput.focus();
+      }
+    }
+
+    unlockBtn.addEventListener('click', unlockSystem);
+    passwordInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') unlockSystem();
+    });
+
+    // Alternar Lente Manualmente
+    toggleLensBtn.addEventListener('click', () => {
+      isLensActive = !isLensActive;
+      if (isLensActive) {
+        toggleLensBtn.classList.add('active');
+        lensBtnLabel.textContent = "Desativar Lente";
+        container.classList.add('lens-ready');
+        container.style.setProperty('--zoom-scale', ZOOM_FACTOR);
+      } else {
+        toggleLensBtn.classList.remove('active');
+        lensBtnLabel.textContent = "Ativar Lente da Verdade";
+        container.classList.remove('lens-ready');
+        container.style.setProperty('--lens-radius', '0px');
+        container.style.setProperty('--lens-opacity', '0');
+        container.style.setProperty('--zoom-scale', '1');
+      }
+    });
+
+    // Rastreamento do Mouse e Efeito de Zoom Localizado
+    container.addEventListener('mousemove', (e) => {
+      if (!isLensActive) return;
+
+      const rect = container.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      container.style.setProperty('--lens-x', `${x}px`);
+      container.style.setProperty('--lens-y', `${y}px`);
+      container.style.setProperty('--lens-radius', `${LENS_SIZE}px`);
+      container.style.setProperty('--lens-opacity', '1');
+    });
+
+    container.addEventListener('mouseleave', () => {
+      if (!isLensActive) return;
+      container.style.setProperty('--lens-radius', '0px');
+      container.style.setProperty('--lens-opacity', '0');
+    });
+
+    // Sincronia rigorosa entre os dois vídeos
+    vSurface.addEventListener('timeupdate', () => {
+      if (Math.abs(vSurface.currentTime - vTruth.currentTime) > 0.04) {
+        vTruth.currentTime = vSurface.currentTime;
+      }
+    });
+
+    vSurface.addEventListener('seeked', () => {
+      vTruth.currentTime = vSurface.currentTime;
+    });
+  </script>
+</body>
+</html>
