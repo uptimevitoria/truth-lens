@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Terminal de Vigilância - Protocolo Verdade</title>
+  <title>Vigilance Terminal - Truth Protocol</title>
   <style>
     * {
       box-sizing: border-box;
@@ -246,19 +246,19 @@
   <!-- Tela de Acesso -->
   <div id="lockScreen">
     <div class="login-terminal">
-      <h1>Terminal de Acesso</h1>
-      <input type="password" id="passwordInput" placeholder="Chave de descriptografia..." autofocus>
-      <button id="unlockBtn">Acessar Câmeras</button>
+      <h1>Access Terminal</h1>
+      <input type="password" id="passwordInput" placeholder="Decryptography Key..." autofocus>
+      <button id="unlockBtn">Access Cameras</button>
       <div class="error-log" id="errorLog"></div>
     </div>
   </div>
 
   <!-- Barra de Ações -->
   <div class="top-bar">
-    <span class="status-text">Canal de Alimentação 01 & 02 [Sincronizado]</span>
+    <span class="status-text">Feeding Channel 01 & 02 [Sincronizado]</span>
     <button class="lens-btn" id="toggleLensBtn">
       <div class="led"></div>
-      <span id="lensBtnLabel">Ativar Lente da Verdade</span>
+      <span id="lensBtnLabel">Activate Lens of Truth</span>
     </button>
   </div>
 
@@ -275,7 +275,7 @@
   </div>
 
   <script>
-    const ACCESS_KEY = "luizajpchat";
+    const ACCESS_KEY = "34312";
     const LENS_SIZE = 135;       // Raio da lupa em pixels
     const ZOOM_FACTOR = 1.18;    // 18% de Zoom In dentro da lente
 
@@ -311,7 +311,7 @@
           console.warn("Autoplay bloqueado pelo navegador:", e);
         });
       } else {
-        errorLog.textContent = "[ACESSO NEGADO] Senha inválida.";
+        errorLog.textContent = "[ACCESS DENIED] Invalid Password.";
         passwordInput.value = "";
         passwordInput.focus();
       }
@@ -327,12 +327,12 @@
       isLensActive = !isLensActive;
       if (isLensActive) {
         toggleLensBtn.classList.add('active');
-        lensBtnLabel.textContent = "Desativar Lente";
+        lensBtnLabel.textContent = "Deactivate Lens";
         container.classList.add('lens-ready');
         container.style.setProperty('--zoom-scale', ZOOM_FACTOR);
       } else {
         toggleLensBtn.classList.remove('active');
-        lensBtnLabel.textContent = "Ativar Lente da Verdade";
+        lensBtnLabel.textContent = "Activate Lens of Truth";
         container.classList.remove('lens-ready');
         container.style.setProperty('--lens-radius', '0px');
         container.style.setProperty('--lens-opacity', '0');
