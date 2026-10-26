@@ -1,10 +1,20 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vigilance Terminal - Truth Protocol</title>
   <style>
+    :root {
+      --bg-color: #070709;
+      --panel-bg: rgba(18, 18, 24, 0.95);
+      --accent-green: #22c55e;
+      --accent-cyan: #38bdf8;
+      --accent-red: #f43f5e;
+      --border-dark: #2a2a38;
+      --font-mono: 'Courier New', Courier, monospace;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -12,7 +22,7 @@
     }
 
     body {
-      background: #070709;
+      background: var(--bg-color);
       color: #e2e8f0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       display: flex;
@@ -24,7 +34,7 @@
       user-select: none;
     }
 
-    /* --- TELA DE ACESSO COM SENHA --- */
+    /* --- TELA 1: ACESSO INICIAL (ROTA DO MAPA UV: 34312) --- */
     #lockScreen {
       position: fixed;
       inset: 0;
@@ -44,13 +54,13 @@
     }
 
     .login-terminal {
-      background: rgba(18, 18, 24, 0.9);
-      border: 1px solid #2a2a38;
+      background: var(--panel-bg);
+      border: 1px solid var(--border-dark);
       border-radius: 10px;
       padding: 35px 30px;
       width: 90%;
-      max-width: 400px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 0 15px rgba(255, 255, 255, 0.02);
+      max-width: 420px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
       text-align: center;
     }
 
@@ -68,11 +78,11 @@
       border-radius: 6px;
       border: 1px solid #334155;
       background: #090a0f;
-      color: #38bdf8;
-      font-family: monospace;
-      font-size: 1.1rem;
+      color: var(--accent-cyan);
+      font-family: var(--font-mono);
+      font-size: 1.2rem;
       text-align: center;
-      letter-spacing: 3px;
+      letter-spacing: 4px;
       outline: none;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
@@ -98,20 +108,15 @@
       transition: background 0.2s, transform 0.1s;
     }
 
-    .login-terminal button:hover {
-      background: #0369a1;
-    }
-
-    .login-terminal button:active {
-      transform: scale(0.98);
-    }
+    .login-terminal button:hover { background: #0369a1; }
+    .login-terminal button:active { transform: scale(0.98); }
 
     .error-log {
-      color: #f43f5e;
+      color: var(--accent-red);
       font-size: 0.8rem;
       margin-top: 14px;
       min-height: 1.2em;
-      font-family: monospace;
+      font-family: var(--font-mono);
     }
 
     /* --- BARRA SUPERIOR DE CONTROLES --- */
@@ -122,23 +127,31 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 12px;
+      gap: 10px;
     }
 
     .status-text {
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       color: #64748b;
       letter-spacing: 1px;
       text-transform: uppercase;
+      font-family: var(--font-mono);
     }
 
-    .lens-btn {
+    .actions-group {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-action {
       background: #181822;
       border: 1px solid #334155;
       color: #cbd5e1;
-      padding: 9px 18px;
+      padding: 9px 16px;
       border-radius: 6px;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 600;
+      font-family: var(--font-mono);
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -146,7 +159,7 @@
       transition: all 0.25s ease;
     }
 
-    .lens-btn .led {
+    .btn-action .led {
       width: 8px;
       height: 8px;
       border-radius: 50%;
@@ -154,18 +167,28 @@
       transition: background 0.3s, box-shadow 0.3s;
     }
 
-    .lens-btn.active {
-      border-color: #22c55e;
+    .btn-action.active {
+      border-color: var(--accent-green);
       color: #f0fdf4;
       background: #0f291e;
     }
 
-    .lens-btn.active .led {
-      background: #22c55e;
-      box-shadow: 0 0 10px #22c55e;
+    .btn-action.active .led {
+      background: var(--accent-green);
+      box-shadow: 0 0 10px var(--accent-green);
     }
 
-    /* --- CONTAINER DE REPRODUÇÃO --- */
+    .btn-identify {
+      border-color: #0284c7;
+      color: #e0f2fe;
+      background: #0c4a6e;
+    }
+
+    .btn-identify:hover {
+      background: #0369a1;
+    }
+
+    /* --- CONTAINER DE REPRODUÇÃO (SURVEILLANCE FEED) --- */
     .viewer-container {
       position: relative;
       width: 92vw;
@@ -191,17 +214,16 @@
       object-fit: cover;
     }
 
-    /* Camada 2: A Verdade com Zoom Óptico Centralizado no Cursor */
+    /* Camada 2: A Verdade (Com Zoom e Retículo) */
     #video-truth {
       pointer-events: none;
-      /* O zoom in ocorre dinamicamente na coordenada do mouse */
       transform-origin: var(--lens-x, 50%) var(--lens-y, 50%);
       transform: scale(var(--zoom-scale, 1));
       clip-path: circle(var(--lens-radius, 0px) at var(--lens-x, -500px) var(--lens-y, -500px));
       transition: clip-path 0.03s linear;
     }
 
-    /* Aro e Retículo da Lente */
+    /* Retículo de Mira */
     .lens-reticle {
       position: absolute;
       top: 0;
@@ -218,7 +240,6 @@
       transition: opacity 0.2s ease;
     }
 
-    /* Linhas internas do retículo */
     .lens-reticle::before,
     .lens-reticle::after {
       content: '';
@@ -239,46 +260,335 @@
       width: 1px;
       transform: translateX(-50%);
     }
+
+    /* --- MODAL POP-UP DE IDENTIFICAÇÃO DOS PACIENTES --- */
+    #identifyModal {
+      position: absolute;
+      inset: 0;
+      background: rgba(6, 7, 10, 0.85);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.25s ease;
+    }
+
+    #identifyModal.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .identify-box {
+      background: #0f121d;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 24px 30px;
+      width: 90%;
+      max-width: 560px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.95);
+    }
+
+    .identify-box h2 {
+      font-size: 1rem;
+      letter-spacing: 2px;
+      color: #38bdf8;
+      margin-bottom: 6px;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+    }
+
+    .identify-box p {
+      font-size: 0.78rem;
+      color: #94a3b8;
+      margin-bottom: 20px;
+      font-family: var(--font-mono);
+    }
+
+    .seats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .seat-slot {
+      background: #090a10;
+      border: 1px solid #1e293b;
+      border-radius: 6px;
+      padding: 10px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .seat-label {
+      font-size: 0.68rem;
+      color: #f59e0b;
+      font-family: var(--font-mono);
+      letter-spacing: 1px;
+    }
+
+    .seat-slot input {
+      width: 100%;
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #334155;
+      background: #040508;
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 1.15rem;
+      font-weight: bold;
+      text-align: center;
+      outline: none;
+      letter-spacing: 2px;
+      transition: all 0.2s;
+    }
+
+    .seat-slot input.correct {
+      border-color: var(--accent-green);
+      background: #064e3b;
+      color: #34d399;
+    }
+
+    .seat-slot input.wrong {
+      border-color: var(--accent-red);
+      background: #450a0a;
+      color: #f87171;
+    }
+
+    .modal-btns {
+      display: flex;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .btn-modal {
+      flex: 1;
+      padding: 10px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-weight: bold;
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      border: 1px solid #334155;
+    }
+
+    .btn-close-modal {
+      background: #1e293b;
+      color: #cbd5e1;
+    }
+
+    .btn-verify {
+      background: #0284c7;
+      color: #fff;
+      border-color: #0284c7;
+    }
+
+    .btn-verify:hover { background: #0369a1; }
+
+    .modal-msg {
+      font-size: 0.75rem;
+      margin-top: 12px;
+      min-height: 1.2em;
+      font-family: var(--font-mono);
+    }
+
+    /* --- TELA 3: VÍDEO FINAL (ELLIE) E GLITCH --- */
+    #glitchScreen {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 5000;
+      display: none;
+    }
+
+    #videoFarewell {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* --- TELA 4: CONGELAMENTO NO QR CODE (BÚSSOLA) --- */
+    #qrScreen {
+      position: fixed;
+      inset: 0;
+      background: #040508;
+      z-index: 6000;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .qr-box {
+      border: 2px solid var(--accent-green);
+      box-shadow: 0 0 35px rgba(34, 197, 94, 0.35);
+      border-radius: 12px;
+      padding: 25px;
+      background: #0a0d14;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 440px;
+      width: 90%;
+    }
+
+    .qr-box h2 {
+      color: var(--accent-green);
+      font-family: var(--font-mono);
+      font-size: 1.05rem;
+      letter-spacing: 2px;
+      margin-bottom: 6px;
+    }
+
+    .qr-box p {
+      color: #94a3b8;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+
+    .qr-placeholder {
+      width: 240px;
+      height: 240px;
+      background: #fff;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+
+    .qr-placeholder img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .qr-footer {
+      margin-top: 20px;
+      font-size: 0.72rem;
+      color: #eab308;
+      font-family: var(--font-mono);
+      letter-spacing: 1px;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Tela de Acesso -->
+  <!-- Tela 1: Acesso Inicial (Código da Rota UV: 34312) -->
   <div id="lockScreen">
     <div class="login-terminal">
-      <h1>Access Terminal</h1>
-      <input type="password" id="passwordInput" placeholder="Decryptography Key..." autofocus>
-      <button id="unlockBtn">Access Cameras</button>
+      <h1>SURVEILLANCE ARCHIVE</h1>
+      <input type="password" id="passwordInput" placeholder="Enter route coordinates..." autofocus>
+      <button id="unlockBtn">DECRYPT FEED</button>
       <div class="error-log" id="errorLog"></div>
     </div>
   </div>
 
-  <!-- Barra de Ações -->
+  <!-- Barra Superior de Controles -->
   <div class="top-bar">
-    <span class="status-text">Feeding Channel 01 & 02 [Synchronized]</span>
-    <button class="lens-btn" id="toggleLensBtn">
-      <div class="led"></div>
-      <span id="lensBtnLabel">Activate Lens of Truth</span>
-    </button>
+    <span class="status-text">CHANNEL 01 & 02 [SYNCHRONIZED FEED]</span>
+    <div class="actions-group">
+      <button class="btn-action btn-identify" id="btnOpenIdentify">
+        <span>📋 IDENTIFY SUBJECTS</span>
+      </button>
+      <button class="btn-action" id="toggleLensBtn">
+        <div class="led"></div>
+        <span id="lensBtnLabel">Activate Ocular Filter</span>
+      </button>
+    </div>
   </div>
 
-  <!-- Reprodutor em Camadas -->
+  <!-- Container de Vídeos em Camadas -->
   <div class="viewer-container" id="container">
-    <!-- Camada Superior (Aparência: Mudo) -->
+    <!-- Camada 1: Normal / Sem filtro -->
     <video id="video-surface" src="video1.mp4" loop playsinline muted></video>
     
-    <!-- Camada Oculta (Verdade: Com áudio e com efeito de lente) -->
+    <!-- Camada 2: Anomalias / Com lente e áudio -->
     <video id="video-truth" src="video2.mp4" loop playsinline></video>
 
-    <!-- Retículo de visualização -->
+    <!-- Retículo da Lente -->
     <div class="lens-reticle" id="reticle"></div>
+
+    <!-- Modal Pop-Up de Identificação dos Pacientes (Anti-travamento) -->
+    <div id="identifyModal">
+      <div class="identify-box">
+        <h2>ANOMALOUS SUBJECT VERIFICATION</h2>
+        <p>CROSS-REFERENCE IDENTIFIED ANOMALIES WITH PHYSICAL DOSSIERS (LEFT TO RIGHT):</p>
+
+        <div class="seats-grid">
+          <div class="seat-slot">
+            <span class="seat-label">SEAT 1 (LEFT)</span>
+            <input type="text" id="idSeat1" maxlength="3" placeholder="000" autocomplete="off">
+          </div>
+          <div class="seat-slot">
+            <span class="seat-label">SEAT 2 (CENTER)</span>
+            <input type="text" id="idSeat2" maxlength="3" placeholder="000" autocomplete="off">
+          </div>
+          <div class="seat-slot">
+            <span class="seat-label">SEAT 3 (RIGHT)</span>
+            <input type="text" id="idSeat3" maxlength="3" placeholder="000" autocomplete="off">
+          </div>
+        </div>
+
+        <div class="modal-btns">
+          <button class="btn-modal btn-close-modal" id="btnCloseModal">RETURN TO VIDEO</button>
+          <button class="btn-modal btn-verify" id="btnVerifyIds">SUBMIT PERICIAL</button>
+        </div>
+
+        <div class="modal-msg" id="modalMsg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tela 3: Glitch / Vídeo de Despedida da Ellie -->
+  <div id="glitchScreen">
+    <video id="videoFarewell" src="COMPLETE FINAL LONDON.mp4" playsinline></video>
+  </div>
+
+  <!-- Tela 4: Congelamento no QR Code da Bússola -->
+  <div id="qrScreen">
+    <div class="qr-box">
+      <h2>RESONANCE SIGNAL OVERLOAD</h2>
+      <p>EMF ANOMALY DETECTED IN THE HALLWAY.<br>SCAN TO ACTIVATE ETHEREAL COMPASS:</p>
+      
+      <!-- AQUI VOCÊ COLA O SEU QR CODE -->
+      <div class="qr-placeholder">
+        <img src="compass_qr.png" alt="Scan for Compass App" onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=https://uptimevitoria.github.io/compass/compass.html'">
+      </div>
+
+      <div class="qr-footer">
+        [PROCEED TO ZERO POINT AT WI-FI ROUTER]
+      </div>
+    </div>
   </div>
 
   <script>
-    const ACCESS_KEY = "34312";
-    const LENS_SIZE = 135;       // Raio da lupa em pixels
-    const ZOOM_FACTOR = 1.18;    // 18% de Zoom In dentro da lente
+    // ==========================================================
+    // CONFIGURAÇÃO DE SENHAS
+    // ==========================================================
+    const MAP_ACCESS_KEYS = ["34312", "3-4-3-1-2"];
+    
+    // Gabarito dos 3 infectados sentados (Esquerda -> Direita):
+    // Johan Rasputin (#061) -> Ireena Limestone (#130) -> Vincent Hazan (#027)
+    const TARGET_SUBJECTS = {
+      seat1: "061",
+      seat2: "130",
+      seat3: "027"
+    };
 
+    const LENS_SIZE = 135;
+    const ZOOM_FACTOR = 1.18;
     let isLensActive = false;
 
     // Elementos DOM
@@ -286,20 +596,36 @@
     const passwordInput = document.getElementById('passwordInput');
     const unlockBtn = document.getElementById('unlockBtn');
     const errorLog = document.getElementById('errorLog');
+
     const toggleLensBtn = document.getElementById('toggleLensBtn');
     const lensBtnLabel = document.getElementById('lensBtnLabel');
     const container = document.getElementById('container');
     const vSurface = document.getElementById('video-surface');
     const vTruth = document.getElementById('video-truth');
 
-    // Desbloqueio e Reprodução
+    const btnOpenIdentify = document.getElementById('btnOpenIdentify');
+    const identifyModal = document.getElementById('identifyModal');
+    const btnCloseModal = document.getElementById('btnCloseModal');
+    const btnVerifyIds = document.getElementById('btnVerifyIds');
+    const modalMsg = document.getElementById('modalMsg');
+
+    const idSeat1 = document.getElementById('idSeat1');
+    const idSeat2 = document.getElementById('idSeat2');
+    const idSeat3 = document.getElementById('idSeat3');
+
+    const glitchScreen = document.getElementById('glitchScreen');
+    const videoFarewell = document.getElementById('videoFarewell');
+    const qrScreen = document.getElementById('qrScreen');
+
+    // ----------------------------------------------------------
+    // 1. DESBLOQUEIO INICIAL (CÓDIGO DO MAPA: 34312)
+    // ----------------------------------------------------------
     function unlockSystem() {
       const entered = passwordInput.value.trim().toLowerCase();
-      if (entered === ACCESS_KEY) {
+      if (MAP_ACCESS_KEYS.includes(entered)) {
         errorLog.textContent = "";
         lockScreen.classList.add('hidden');
 
-        // Garante que o áudio vem exclusivamente do vídeo da verdade
         vSurface.muted = true;
         vTruth.muted = false;
         vTruth.volume = 1.0;
@@ -308,10 +634,10 @@
         vTruth.currentTime = 0;
 
         Promise.all([vSurface.play(), vTruth.play()]).catch(e => {
-          console.warn("Autoplay bloqueado pelo navegador:", e);
+          console.warn("Autoplay:", e);
         });
       } else {
-        errorLog.textContent = "[ACCESS DENIED] Invalid Password.";
+        errorLog.textContent = "[ACCESS DENIED] Invalid Route Coordinates.";
         passwordInput.value = "";
         passwordInput.focus();
       }
@@ -322,17 +648,19 @@
       if (e.key === 'Enter') unlockSystem();
     });
 
-    // Alternar Lente Manualmente
+    // ----------------------------------------------------------
+    // 2. CONTROLES DA LENTE DA VERDADE
+    // ----------------------------------------------------------
     toggleLensBtn.addEventListener('click', () => {
       isLensActive = !isLensActive;
       if (isLensActive) {
         toggleLensBtn.classList.add('active');
-        lensBtnLabel.textContent = "Deactivate Lens";
+        lensBtnLabel.textContent = "Deactivate Filter";
         container.classList.add('lens-ready');
         container.style.setProperty('--zoom-scale', ZOOM_FACTOR);
       } else {
         toggleLensBtn.classList.remove('active');
-        lensBtnLabel.textContent = "Activate Lens of Truth";
+        lensBtnLabel.textContent = "Activate Ocular Filter";
         container.classList.remove('lens-ready');
         container.style.setProperty('--lens-radius', '0px');
         container.style.setProperty('--lens-opacity', '0');
@@ -340,10 +668,8 @@
       }
     });
 
-    // Rastreamento do Mouse e Efeito de Zoom Localizado
     container.addEventListener('mousemove', (e) => {
       if (!isLensActive) return;
-
       const rect = container.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
@@ -360,16 +686,102 @@
       container.style.setProperty('--lens-opacity', '0');
     });
 
-    // Sincronia rigorosa entre os dois vídeos
+    // Sincronia de Vídeo
     vSurface.addEventListener('timeupdate', () => {
       if (Math.abs(vSurface.currentTime - vTruth.currentTime) > 0.04) {
         vTruth.currentTime = vSurface.currentTime;
       }
     });
 
-    vSurface.addEventListener('seeked', () => {
-      vTruth.currentTime = vSurface.currentTime;
+    // ----------------------------------------------------------
+    // 3. POP-UP MODAL (IDENTIFICAÇÃO DOS PACIENTES)
+    // ----------------------------------------------------------
+    btnOpenIdentify.addEventListener('click', () => {
+      identifyModal.classList.add('active');
+      modalMsg.textContent = "";
+      if (!idSeat1.classList.contains('correct')) idSeat1.focus();
     });
+
+    btnCloseModal.addEventListener('click', () => {
+      identifyModal.classList.remove('active');
+    });
+
+    // Validação com Anti-Travamento (Feedback individual por campo)
+    btnVerifyIds.addEventListener('click', () => {
+      const s1 = idSeat1.value.trim();
+      const s2 = idSeat2.value.trim();
+      const s3 = idSeat3.value.trim();
+
+      let allCorrect = true;
+
+      // Validação Assento 1
+      if (s1 === TARGET_SUBJECTS.seat1) {
+        idSeat1.className = "correct";
+      } else {
+        idSeat1.className = "wrong";
+        allCorrect = false;
+      }
+
+      // Validação Assento 2
+      if (s2 === TARGET_SUBJECTS.seat2) {
+        idSeat2.className = "correct";
+      } else {
+        idSeat2.className = "wrong";
+        allCorrect = false;
+      }
+
+      // Validação Assento 3
+      if (s3 === TARGET_SUBJECTS.seat3) {
+        idSeat3.className = "correct";
+      } else {
+        idSeat3.className = "wrong";
+        allCorrect = false;
+      }
+
+      if (allCorrect) {
+        modalMsg.style.color = "var(--accent-green)";
+        modalMsg.textContent = "[CORRECT] ALL ANOMALOUS SUBJECTS IDENTIFIED. OVERRIDING...";
+        
+        // Dispara o clímax após 1 segundo de confirmação
+        setTimeout(() => {
+          triggerFarewellClimax();
+        }, 1000);
+      } else {
+        modalMsg.style.color = "var(--accent-red)";
+        modalMsg.textContent = "[MISMATCH] SOME SUBJECT IDs DO NOT MATCH CLINICAL FINDINGS.";
+      }
+    });
+
+    // Pular de campo automaticamente ao digitar 3 números
+    [idSeat1, idSeat2, idSeat3].forEach((input, index, arr) => {
+      input.addEventListener('input', () => {
+        input.classList.remove('wrong');
+        if (input.value.length === 3 && index < arr.length - 1) {
+          arr[index + 1].focus();
+        }
+      });
+    });
+
+    // ----------------------------------------------------------
+    // 4. CLÍMAX: VÍDEO FINAL DA ELLIE + QR CODE DA BÚSSOLA
+    // ----------------------------------------------------------
+    function triggerFarewellClimax() {
+      // Pausa os vídeos de triagem
+      vSurface.pause();
+      vTruth.pause();
+      identifyModal.classList.remove('active');
+
+      // Abre o vídeo final em tela cheia
+      glitchScreen.style.display = 'block';
+      videoFarewell.currentTime = 0;
+      videoFarewell.play();
+
+      // Quando o vídeo da Ellie terminar, revela o QR Code da Bússola
+      videoFarewell.onended = () => {
+        glitchScreen.style.display = 'none';
+        qrScreen.style.display = 'flex';
+      };
+    }
   </script>
 </body>
 </html>
