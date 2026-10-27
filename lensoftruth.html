@@ -11,6 +11,7 @@
       --accent-green: #22c55e;
       --accent-cyan: #38bdf8;
       --accent-red: #f43f5e;
+      --accent-amber: #f59e0b;
       --border-dark: #2a2a38;
       --font-mono: 'Courier New', Courier, monospace;
     }
@@ -70,6 +71,7 @@
       text-transform: uppercase;
       color: #94a3b8;
       margin-bottom: 25px;
+      font-family: var(--font-mono);
     }
 
     .login-terminal input {
@@ -105,6 +107,7 @@
       letter-spacing: 1px;
       cursor: pointer;
       text-transform: uppercase;
+      font-family: var(--font-mono);
       transition: background 0.2s, transform 0.1s;
     }
 
@@ -184,9 +187,7 @@
       background: #0c4a6e;
     }
 
-    .btn-identify:hover {
-      background: #0369a1;
-    }
+    .btn-identify:hover { background: #0369a1; }
 
     /* --- CONTAINER DE REPRODUÇÃO (SURVEILLANCE FEED) --- */
     .viewer-container {
@@ -201,9 +202,7 @@
       cursor: default;
     }
 
-    .viewer-container.lens-ready {
-      cursor: crosshair;
-    }
+    .viewer-container.lens-ready { cursor: crosshair; }
 
     video {
       position: absolute;
@@ -261,12 +260,12 @@
       transform: translateX(-50%);
     }
 
-    /* --- MODAL POP-UP DE IDENTIFICAÇÃO DOS PACIENTES --- */
+    /* --- MODAL POP-UP DE IDENTIFICAÇÃO DOS INFECTADOS --- */
     #identifyModal {
       position: absolute;
       inset: 0;
-      background: rgba(6, 7, 10, 0.85);
-      backdrop-filter: blur(4px);
+      background: rgba(6, 7, 10, 0.88);
+      backdrop-filter: blur(5px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -287,7 +286,7 @@
       border-radius: 8px;
       padding: 24px 30px;
       width: 90%;
-      max-width: 560px;
+      max-width: 580px;
       text-align: center;
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.95);
     }
@@ -340,11 +339,11 @@
       background: #040508;
       color: #fff;
       font-family: var(--font-mono);
-      font-size: 1.15rem;
+      font-size: 1.2rem;
       font-weight: bold;
       text-align: center;
       outline: none;
-      letter-spacing: 2px;
+      letter-spacing: 3px;
       transition: all 0.2s;
     }
 
@@ -368,7 +367,7 @@
 
     .btn-modal {
       flex: 1;
-      padding: 10px;
+      padding: 11px;
       border-radius: 4px;
       font-family: var(--font-mono);
       font-weight: bold;
@@ -392,14 +391,62 @@
     .btn-verify:hover { background: #0369a1; }
 
     .modal-msg {
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       margin-top: 12px;
       min-height: 1.2em;
       font-family: var(--font-mono);
     }
 
-    /* --- TELA 3: VÍDEO FINAL (ELLIE) E GLITCH --- */
-    #glitchScreen {
+    /* --- CAMADA DE GLITCH PESADO (TRANSIÇÃO) --- */
+    #glitchOverlay {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 4000;
+      display: none;
+      pointer-events: none;
+    }
+
+    #glitchOverlay.active {
+      display: block;
+      animation: screenGlitch 0.15s infinite;
+    }
+
+    @keyframes screenGlitch {
+      0% {
+        transform: translate(0, 0) scale(1);
+        filter: invert(0) hue-rotate(0deg);
+        background: #05070a;
+      }
+      20% {
+        transform: translate(-6px, 4px) skewX(4deg);
+        filter: invert(0.8) contrast(200%);
+        background: #0f172a;
+      }
+      40% {
+        transform: translate(8px, -5px) scale(1.02);
+        filter: hue-rotate(90deg);
+        background: #1e1b4b;
+      }
+      60% {
+        transform: translate(-4px, -2px) skewY(-2deg);
+        filter: invert(1);
+        background: #022c22;
+      }
+      80% {
+        transform: translate(5px, 6px);
+        filter: contrast(300%) hue-rotate(180deg);
+        background: #450a0a;
+      }
+      100% {
+        transform: translate(0, 0) scale(1);
+        filter: invert(0);
+        background: #000;
+      }
+    }
+
+    /* --- TELA 3: VÍDEO FINAL (ELLIE) --- */
+    #farewellScreen {
       position: fixed;
       inset: 0;
       background: #000;
@@ -413,11 +460,11 @@
       object-fit: cover;
     }
 
-    /* --- TELA 4: CONGELAMENTO NO QR CODE (BÚSSOLA) --- */
+    /* --- TELA 4: QR CODE DA BÚSSOLA + WATCH AGAIN --- */
     #qrScreen {
       position: fixed;
       inset: 0;
-      background: #040508;
+      background: radial-gradient(circle at center, #0f172a 0%, #030712 100%);
       z-index: 6000;
       display: none;
       flex-direction: column;
@@ -429,10 +476,10 @@
 
     .qr-box {
       border: 2px solid var(--accent-green);
-      box-shadow: 0 0 35px rgba(34, 197, 94, 0.35);
+      box-shadow: 0 0 45px rgba(34, 197, 94, 0.4), inset 0 0 15px rgba(34, 197, 94, 0.15);
       border-radius: 12px;
-      padding: 25px;
-      background: #0a0d14;
+      padding: 30px;
+      background: rgba(10, 13, 20, 0.95);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -443,7 +490,7 @@
     .qr-box h2 {
       color: var(--accent-green);
       font-family: var(--font-mono);
-      font-size: 1.05rem;
+      font-size: 1.1rem;
       letter-spacing: 2px;
       margin-bottom: 6px;
     }
@@ -451,33 +498,63 @@
     .qr-box p {
       color: #94a3b8;
       font-family: var(--font-mono);
-      font-size: 0.75rem;
-      margin-bottom: 20px;
+      font-size: 0.78rem;
+      margin-bottom: 22px;
       line-height: 1.4;
     }
 
-    .qr-placeholder {
+    .qr-image-wrapper {
       width: 240px;
       height: 240px;
       background: #fff;
-      border-radius: 8px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+      margin-bottom: 20px;
+      padding: 8px;
     }
 
-    .qr-placeholder img {
+    .qr-image-wrapper img {
       width: 100%;
       height: 100%;
       object-fit: contain;
+      image-rendering: pixelated;
+    }
+
+    .qr-actions {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      gap: 12px;
+    }
+
+    .btn-replay {
+      width: 100%;
+      padding: 10px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #e2e8f0;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-replay:hover {
+      background: #334155;
+      color: #fff;
+      border-color: #64748b;
     }
 
     .qr-footer {
-      margin-top: 20px;
       font-size: 0.72rem;
-      color: #eab308;
+      color: var(--accent-amber);
       font-family: var(--font-mono);
       letter-spacing: 1px;
     }
@@ -520,23 +597,23 @@
     <!-- Retículo da Lente -->
     <div class="lens-reticle" id="reticle"></div>
 
-    <!-- Modal Pop-Up de Identificação dos Pacientes (Anti-travamento) -->
+    <!-- Modal Pop-Up de Identificação dos Infectados -->
     <div id="identifyModal">
       <div class="identify-box">
         <h2>ANOMALOUS SUBJECT VERIFICATION</h2>
-        <p>CROSS-REFERENCE IDENTIFIED ANOMALIES WITH PHYSICAL DOSSIERS (LEFT TO RIGHT):</p>
+        <p>ENTER PERICIAL DOSSIER IDs FOR INFECTED SUBJECTS (LEFT TO RIGHT):</p>
 
         <div class="seats-grid">
           <div class="seat-slot">
-            <span class="seat-label">INFECTED 1</span>
+            <span class="seat-label">INFECTED 1 (LEFT)</span>
             <input type="text" id="idSeat1" maxlength="3" placeholder="000" autocomplete="off">
           </div>
           <div class="seat-slot">
-            <span class="seat-label">INFECTED 2</span>
+            <span class="seat-label">INFECTED 2 (CENTER)</span>
             <input type="text" id="idSeat2" maxlength="3" placeholder="000" autocomplete="off">
           </div>
           <div class="seat-slot">
-            <span class="seat-label">INFECTED 3</span>
+            <span class="seat-label">INFECTED 3 (RIGHT)</span>
             <input type="text" id="idSeat3" maxlength="3" placeholder="000" autocomplete="off">
           </div>
         </div>
@@ -551,31 +628,35 @@
     </div>
   </div>
 
-  <!-- Tela 3: Glitch / Vídeo de Despedida da Ellie -->
-  <div id="glitchScreen">
+  <!-- Camada de Glitch / Pane Geral -->
+  <div id="glitchOverlay"></div>
+
+  <!-- Tela 3: Vídeo de Despedida da Ellie -->
+  <div id="farewellScreen">
     <video id="videoFarewell" src="COMPLETE FINAL LONDON.mp4" playsinline></video>
   </div>
 
-  <!-- Tela 4: Congelamento no QR Code da Bússola -->
+  <!-- Tela 4: Congelamento no QR Code da Bússola + Watch Again -->
   <div id="qrScreen">
     <div class="qr-box">
       <h2>RESONANCE SIGNAL OVERLOAD</h2>
       <p>EMF ANOMALY DETECTED IN THE HALLWAY.<br>SCAN TO ACTIVATE ETHEREAL COMPASS:</p>
       
-      <!-- AQUI VOCÊ COLA O SEU QR CODE -->
-      <div class="qr-placeholder">
-        <img src="compass_qr.png" alt="Scan for Compass App" onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=https://uptimevitoria.github.io/compass/compass.html'">
+      <!-- Imagem oficial do QR Code que você providenciou -->
+      <div class="qr-image-wrapper">
+        <img src="QR-Compass.png" alt="Scan for Compass App">
       </div>
 
-      <div class="qr-footer">
-        [PROCEED TO ZERO POINT AT WI-FI ROUTER]
+      <div class="qr-actions">
+        <button class="btn-replay" id="btnWatchAgain">↺ WATCH AGAIN</button>
+        <span class="qr-footer">[PROCEED TO ZERO POINT AT WI-FI ROUTER]</span>
       </div>
     </div>
   </div>
 
   <script>
     // ==========================================================
-    // CONFIGURAÇÃO DE SENHAS
+    // CONFIGURAÇÃO DE SENHAS E ALVOS
     // ==========================================================
     const MAP_ACCESS_KEYS = ["34312", "3-4-3-1-2"];
     
@@ -613,9 +694,11 @@
     const idSeat2 = document.getElementById('idSeat2');
     const idSeat3 = document.getElementById('idSeat3');
 
-    const glitchScreen = document.getElementById('glitchScreen');
+    const glitchOverlay = document.getElementById('glitchOverlay');
+    const farewellScreen = document.getElementById('farewellScreen');
     const videoFarewell = document.getElementById('videoFarewell');
     const qrScreen = document.getElementById('qrScreen');
+    const btnWatchAgain = document.getElementById('btnWatchAgain');
 
     // ----------------------------------------------------------
     // 1. DESBLOQUEIO INICIAL (CÓDIGO DO MAPA: 34312)
@@ -686,7 +769,7 @@
       container.style.setProperty('--lens-opacity', '0');
     });
 
-    // Sincronia de Vídeo
+    // Sincronia contínua de reprodução
     vSurface.addEventListener('timeupdate', () => {
       if (Math.abs(vSurface.currentTime - vTruth.currentTime) > 0.04) {
         vTruth.currentTime = vSurface.currentTime;
@@ -694,7 +777,7 @@
     });
 
     // ----------------------------------------------------------
-    // 3. POP-UP MODAL (IDENTIFICAÇÃO DOS PACIENTES)
+    // 3. POP-UP MODAL (IDENTIFICAÇÃO DOS INFECTADOS)
     // ----------------------------------------------------------
     btnOpenIdentify.addEventListener('click', () => {
       identifyModal.classList.add('active');
@@ -706,7 +789,7 @@
       identifyModal.classList.remove('active');
     });
 
-    // Validação com Anti-Travamento (Feedback individual por campo)
+    // Validação com Anti-Travamento (Feedback individual)
     btnVerifyIds.addEventListener('click', () => {
       const s1 = idSeat1.value.trim();
       const s2 = idSeat2.value.trim();
@@ -714,7 +797,7 @@
 
       let allCorrect = true;
 
-      // Validação Assento 1
+      // Validação Infectado 1
       if (s1 === TARGET_SUBJECTS.seat1) {
         idSeat1.className = "correct";
       } else {
@@ -722,7 +805,7 @@
         allCorrect = false;
       }
 
-      // Validação Assento 2
+      // Validação Infectado 2
       if (s2 === TARGET_SUBJECTS.seat2) {
         idSeat2.className = "correct";
       } else {
@@ -730,7 +813,7 @@
         allCorrect = false;
       }
 
-      // Validação Assento 3
+      // Validação Infectado 3
       if (s3 === TARGET_SUBJECTS.seat3) {
         idSeat3.className = "correct";
       } else {
@@ -740,19 +823,18 @@
 
       if (allCorrect) {
         modalMsg.style.color = "var(--accent-green)";
-        modalMsg.textContent = "[CORRECT] ALL ANOMALOUS SUBJECTS IDENTIFIED. OVERRIDING...";
+        modalMsg.textContent = "[CORRECT] SUBJECTS CONFIRMED. SYSTEM COLLAPSING...";
         
-        // Dispara o clímax após 1 segundo de confirmação
         setTimeout(() => {
-          triggerFarewellClimax();
-        }, 1000);
+          triggerGlitchAndFarewell();
+        }, 800);
       } else {
         modalMsg.style.color = "var(--accent-red)";
-        modalMsg.textContent = "[MISMATCH] SOME SUBJECT IDs DO NOT MATCH CLINICAL FINDINGS.";
+        modalMsg.textContent = "[MISMATCH] SOME SUBJECT IDs DO NOT MATCH CLINICAL ARCHIVE.";
       }
     });
 
-    // Pular de campo automaticamente ao digitar 3 números
+    // Avanço automático entre os 3 inputs
     [idSeat1, idSeat2, idSeat3].forEach((input, index, arr) => {
       input.addEventListener('input', () => {
         input.classList.remove('wrong');
@@ -763,25 +845,68 @@
     });
 
     // ----------------------------------------------------------
-    // 4. CLÍMAX: VÍDEO FINAL DA ELLIE + QR CODE DA BÚSSOLA
+    // 4. EFEITO DE GLITCH SINTÉTICO (ÁUDIO + VÍDEO) & CLÍMAX
     // ----------------------------------------------------------
-    function triggerFarewellClimax() {
-      // Pausa os vídeos de triagem
+    function playSyntheticStaticNoise(durationMs) {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const bufferSize = audioCtx.sampleRate * (durationMs / 1000);
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = Math.random() * 2 - 1; // Ruído branco puro
+        }
+
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = buffer;
+
+        const gainNode = audioCtx.createGain();
+        gainNode.gain.setValueAtTime(0.35, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + (durationMs / 1000));
+
+        noise.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        noise.start();
+      } catch (e) {
+        console.warn("AudioContext bloqueado:", e);
+      }
+    }
+
+    function triggerGlitchAndFarewell() {
+      // 1. Pausa os vídeos da triagem e fecha modal
       vSurface.pause();
       vTruth.pause();
       identifyModal.classList.remove('active');
 
-      // Abre o vídeo final em tela cheia
-      glitchScreen.style.display = 'block';
-      videoFarewell.currentTime = 0;
-      videoFarewell.play();
+      // 2. Dispara o glitch na tela e o som de estática
+      glitchOverlay.classList.add('active');
+      playSyntheticStaticNoise(1500);
 
-      // Quando o vídeo da Ellie terminar, revela o QR Code da Bússola
+      // 3. Após 1,5 segundos de pane, entra no vídeo da Ellie
+      setTimeout(() => {
+        glitchOverlay.classList.remove('active');
+        farewellScreen.style.display = 'block';
+        videoFarewell.currentTime = 0;
+        videoFarewell.play();
+      }, 1500);
+
+      // 4. Quando o vídeo da Ellie terminar, revela o QR Code
       videoFarewell.onended = () => {
-        glitchScreen.style.display = 'none';
+        farewellScreen.style.display = 'none';
         qrScreen.style.display = 'flex';
       };
     }
+
+    // ----------------------------------------------------------
+    // 5. BOTÃO "WATCH AGAIN" (REPLAY DA TRANSMISSÃO)
+    // ----------------------------------------------------------
+    btnWatchAgain.addEventListener('click', () => {
+      qrScreen.style.display = 'none';
+      farewellScreen.style.display = 'block';
+      videoFarewell.currentTime = 0;
+      videoFarewell.play();
+    });
   </script>
 </body>
 </html>
